@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 const initialItems = [
   { id: 1, description: "Passports", quantity: 2, packed: false },
@@ -7,11 +7,15 @@ const initialItems = [
 ];
 
 const App = () => {
+  const [items, setItems] = useState([]);
+  function handleAddItems(item) {
+    setItems((items) => [...items, item]);
+  }
   return (
     <div className="app">
       <Logo />
-      <Form />
-      <PackingList />
+      <Form onAddItems = {handleAddItems} />
+      <PackingList items = {items}/>
       <Status />
     </div>
   );
@@ -20,25 +24,49 @@ const App = () => {
 function Logo() {
   return <h1> 🏖️ Far Away 💼 </h1>;
 }
-function Form() {
+function Form({onAddItems}) {
+  const [description, setDescription] = useState("");
+  const [quantity, setQuantity] = useState(1);
+
+  
+  function handleSubmit(e) {
+    e.preventDefault();
+    if (!description) return;
+    const newItem = { description, quantity, packed: false, id: Date.now() };
+    onAddItems(newItem);
+    setDescription("");
+    setQuantity(1);
+  }
   return (
-    <form className="add-form" action="">
+    <form className="add-form" onSubmit={(e) => handleSubmit(e)}>
       <h3>What you need your trip ?👽 </h3>
-      <select name="" id="">
+      <select
+        value={quantity}
+        onChange={(e) => setQuantity(parseInt(e.target.value))}
+      >
         {Array.from({ length: 20 }, (_, i) => i + 1).map((num) => (
-          <option value={num}>{num}</option>
+          <option key={num} value={num}>
+            {num}
+          </option>
         ))}
       </select>
-      <input type="text" placeholder="Item..." />
+      <input
+        type="text"
+        placeholder="Item..."
+        value={description}
+        onChange={(e) => {
+          setDescription(e.target.value);
+        }}
+      />
       <button>Add</button>
     </form>
   );
 }
-function PackingList() {
+function PackingList({items}) {
   return (
     <div className="list">
       <ul>
-        {initialItems.map((item, index) => (
+        {items.map((item, index) => (
           <Item key={index} item={item} />
         ))}
       </ul>
